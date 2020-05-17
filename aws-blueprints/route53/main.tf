@@ -8,7 +8,7 @@ resource "aws_route53_zone" "sub" {
 }
 
 resource "aws_route53_record" "sub_ns" {
-  zone_id = "${aws_route53_zone.main.zone_id}"
+  zone_id = aws_route53_zone.main.zone_id
   name    = join(".", [var.sub_dns_name, var.main_zone_name])
   type    = "NS"
   ttl     = "30"
