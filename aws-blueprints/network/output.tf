@@ -10,6 +10,16 @@ output "vpc_cidr" {
   value = module.vpc.vpc_cidr_block
 }
 
+output "igw_id" {
+  value       = module.vpc.igw_id
+  description = "The ID of the Internet Gateway"
+}
+
+output "vpc_id" {
+  value       = module.vpc.vpc_id
+  description = "The ID of the VPC"
+}
+
 output "public_route_table_ids" {
   description = "IDs of the created public route tables"
   value       = module.subnets.public_route_table_ids
