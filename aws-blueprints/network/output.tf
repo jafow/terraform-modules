@@ -10,27 +10,6 @@ output "vpc_cidr" {
   value = module.vpc.vpc_cidr_block
 }
 
-
-output "public_subnet_ids" {
-  description = "IDs of the created public subnets"
-  value       = module.subnets.public_subnet_ids
-}
-
-output "private_subnet_ids" {
-  description = "IDs of the created private subnets"
-  value       = module.subnets.private_subnet_ids
-}
-
-output "public_subnet_cidrs" {
-  description = "CIDR blocks of the created public subnets"
-  value       = module.subnets.public_subnet_cidrs
-}
-
-output "private_subnet_cidrs" {
-  description = "CIDR blocks of the created private subnets"
-  value       = module.subnets.private_subnet_cidrs
-}
-
 output "public_route_table_ids" {
   description = "IDs of the created public route tables"
   value       = module.subnets.public_route_table_ids
