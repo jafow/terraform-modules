@@ -35,9 +35,8 @@ data "aws_iam_policy_document" "policy" {
       "s3:*"
     ]
 
-    resources = [
-      aws_s3_bucket.b.arn
-    ]
+    resources =       aws_s3_bucket.b.*.arn
+
 
     principals {
       type = "AWS"
@@ -47,7 +46,7 @@ data "aws_iam_policy_document" "policy" {
   }
 }
 
-resource "aws_bucket_policy" "b" {
-  bucket = aws_s3_bucket.b.id
+resource "aws_s3_bucket_policy" "b" {
+  bucket = join("", aws_s3_bucket.b.*.id)
   policy = data.aws_iam_policy_document.policy.json
 }
