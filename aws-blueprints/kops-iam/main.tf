@@ -51,3 +51,9 @@ resource "aws_iam_group_policy_attachment" "vpc-attach" {
   group      = aws_iam_group.group.name
   policy_arn = data.aws_iam_policy.vpc.arn
 }
+
+resource "aws_key_pair" "ec2" {
+  key_name_prefix = "${var.stage}-${var.region}-${var.group_name}"
+  public_key      = var.public_key
+}
+
