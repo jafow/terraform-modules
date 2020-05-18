@@ -17,6 +17,11 @@ variable "route53_zone_name" {
   type = string
 }
 
+variable "enabled" {
+  type = bool
+  default = true
+}
+
 variable "tags" {
   type = map
   default = {}
