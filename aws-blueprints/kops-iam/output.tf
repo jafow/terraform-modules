@@ -17,3 +17,15 @@ output "path_name" {
 output "uid" {
   value = aws_iam_group.group.unique_id
 }
+
+output "iam_user_arn" {
+  value = aws_iam_user.kops.arn
+}
+
+output "iam_user_key_id" {
+  value = aws_iam_access_key.kops.id
+}
+
+output "iam_user_key_secret" {
+  value = aws_iam_access_key.kops.secret
+}

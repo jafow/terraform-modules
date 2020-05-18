@@ -8,3 +8,5 @@ variable "path_name" {
 }
 
 variable "aws_account_id" {}
+
+variable "user_name" {}
