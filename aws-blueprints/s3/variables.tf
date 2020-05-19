@@ -33,3 +33,5 @@ variable tags {
 variable "bucket_principal_arn" {
   default = "*"
 }
+
+variable "account_id" {}

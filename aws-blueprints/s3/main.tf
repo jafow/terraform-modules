@@ -1,9 +1,4 @@
-resource "aws_kms_key" "key" {
-  count = var.kms_master_key_arn == "" && var.sse_enabled ? 1 : 0
-  description = "KMS key used to encrypt ${var.bucket_name} s3 bucket"
-  deletion_window_in_days = var.deletion_window_in_days
-  tags = var.tags
-}
+data "aws_caller_identity" "caller" {}
 
 resource "aws_s3_bucket" "b" {
   count         = var.sse_enabled ? 1 : 0
@@ -21,8 +16,7 @@ resource "aws_s3_bucket" "b" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm     = var.sse_algorithm
-        kms_master_key_id = var.kms_master_key_arn == "" ? join("", aws_kms_key.key.*.arn) : var.kms_master_key_arn
+        sse_algorithm     = "AES256"
       }
     }
   }
@@ -30,17 +24,17 @@ resource "aws_s3_bucket" "b" {
 
 data "aws_iam_policy_document" "policy" {
   statement {
-    sid = "${var.bucket_name}-s3-policy"
+    sid = "${var.bucket_name}-s3-policy0"
     actions = [
       "s3:*"
     ]
 
-    resources =       aws_s3_bucket.b.*.arn
+    resources = [join("", aws_s3_bucket.b.*.arn), "${aws_s3_bucket.b.0.arn}/*"]
 
 
     principals {
       type = "AWS"
-      identifiers = [var.bucket_principal_arn]
+      identifiers = ["arn:aws:iam::${var.account_id}:root", var.bucket_principal_arn]
     }
 
   }
