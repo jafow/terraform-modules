@@ -62,6 +62,12 @@ variable private_subnet_ids {
   default     = []
 }
 
+variable "storage_encrypted" {
+  description = "if storage is encrypted at rest"
+  type = bool
+  default = true
+}
+
 variable ssm_path {}
 variable tags {
   type    = map

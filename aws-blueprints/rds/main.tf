@@ -26,5 +26,6 @@ resource "aws_db_instance" "default" {
   vpc_security_group_ids              = var.vpc_security_group_ids
   backup_retention_period             = var.backup_retention_period
   db_subnet_group_name                = aws_db_subnet_group.default.id
+  storage_encrypted   = var.storage_encrypted
   tags                                = var.tags
 }
