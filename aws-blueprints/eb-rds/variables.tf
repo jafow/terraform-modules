@@ -25,3 +25,19 @@ variable container_memory {
 }
 
 variable task_name {}
+
+variable domain_name {}
+variable subject_alternative_names {
+  default = []
+  type = list(string)
+}
+
+variable ttl {
+  default = 60
+}
+
+variable dns_zone_name {}
+
+variable enable_tls {
+  default = false
+}

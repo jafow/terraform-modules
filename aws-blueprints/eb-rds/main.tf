@@ -25,7 +25,7 @@ resource "aws_iam_role_policy_attachment" "task_exec_role_policy" {
 
 resource "aws_iam_role" "task_exec_role" {
   name = "${var.task_name}-execution-role"
-  assume_role_policy = "${data.aws_iam_policy_document.assume_role_policy.json}"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
 # main
