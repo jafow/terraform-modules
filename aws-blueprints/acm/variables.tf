@@ -3,14 +3,14 @@ variable "domain_name" {
 }
 
 variable "subject_alternative_names" {
-  type = list
+  type    = list
   default = []
 }
 
 variable "ttl" {
   description = "dns time to live"
-  type = string
-  default = 300
+  type        = string
+  default     = 300
 }
 
 variable "route53_zone_name" {
@@ -18,11 +18,11 @@ variable "route53_zone_name" {
 }
 
 variable "enabled" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "tags" {
-  type = map
+  type    = map
   default = {}
 }

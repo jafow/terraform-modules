@@ -1,8 +1,15 @@
+locals {
+  // Get distinct list of domains and SANs
+  distinct_domain_names = distinct(concat([var.domain_name], [for s in var.subject_alternative_names : replace(s, "*.", "")]))
+
+  validation_domains = var.enabled ? [for k, v in aws_acm_certificate.cert[0].domain_validation_options : tomap(v) if contains(local.distinct_domain_names, replace(v.domain_name, "*.", ""))] : []
+}
+
 resource "aws_acm_certificate" "cert" {
-  # count = var.enabled ? 1 : 0
-  domain_name       = var.domain_name
+  count = var.enabled ? 1 : 0
+  domain_name               = var.domain_name
   subject_alternative_names = var.subject_alternative_names
-  validation_method = "DNS"
+  validation_method         = "DNS"
 
   tags = var.tags
 
@@ -16,42 +23,22 @@ data "aws_route53_zone" "zone" {
   private_zone = false
 }
 
-# resource "aws_route53_record" "cert_validation" {
-#   count = length(var.subject_alternative_names) > 0 ? length(var.subject_alternative_names) + 1 : 1
-
-#   name    = lookup(aws_acm_certificate.cert.0.domain_validation_options[count.index], "resource_record_name")
-#   type    = lookup(aws_acm_certificate.cert.0.domain_validation_options[count.index], "resource_record_type")
-#   records = [lookup(aws_acm_certificate.cert.0.domain_validation_options[count.index], "resource_record_value")]
-
-#   allow_overwrite = true
-#   zone_id = data.aws_route53_zone.zone.zone_id
-#   ttl     = var.ttl
-# }
-
-# resource "aws_acm_certificate_validation" "cert" {
-#   certificate_arn         = join("", aws_acm_certificate.cert.*.arn)
-#   validation_record_fqdns = aws_route53_record.cert_validation.*.fqdn
-# }
-
 resource "aws_route53_record" "cert_validation" {
-  for_each = {
-    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
-  }
+  count = length(local.distinct_domain_names) + 1
 
-  allow_overwrite = true
-  name            = each.value.name
-  records         = [each.value.record]
-  ttl             = 60
-  type            = each.value.type
-  zone_id         = data.aws_route53_zone.zone.zone_id
+  zone_id = data.aws_route53_zone.zone.zone_id
+  name    = element(local.validation_domains, count.index)["resource_record_name"]
+  type    = element(local.validation_domains, count.index)["resource_record_type"]
+  ttl     = var.ttl
+
+  records = [
+    element(local.validation_domains, count.index)["resource_record_value"]
+  ]
+
+  depends_on = [aws_acm_certificate.cert]
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {
-  certificate_arn         = aws_acm_certificate.cert.arn
+  certificate_arn         = aws_acm_certificate.cert[0].arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
-
