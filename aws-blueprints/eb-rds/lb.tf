@@ -73,8 +73,7 @@ resource "aws_lb_listener" "https" {
   port = 443
   protocol = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn = module.acm.acm_arn
-  vpc_id = module.network.vpc_id
+  certificate_arn = join("", module.acm.acm_arn)
 
   default_action {
     type = "redirect"
