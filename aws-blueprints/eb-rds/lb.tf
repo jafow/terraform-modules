@@ -2,16 +2,15 @@
 locals {
   name = "${var.cluster_name}-${var.task_name}"
 }
-
 module "acm" {
-  source = "git::https://github.com/jafow/terraform-modules//aws-blueprints/acm?ref=tags/acm-0.2.1"
-  # source = "
-  # source = "../../../../../terraform-modules/aws-blueprints/acm"
-  domain_name = var.domain_name
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> v2.0"
+
+  domain_name  = var.domain_name
+  zone_id      = var.dns_zone_name
+
   subject_alternative_names = var.subject_alternative_names
-  ttl = var.ttl
-  route53_zone_name = var.dns_zone_name
-  enabled = var.enable_tls
+
   tags = var.tags
 }
 
@@ -31,7 +30,7 @@ resource "aws_security_group" "alb" {
     from_port = 80
     to_port = 80
     protocol = "tcp"
-    cidr_blocks = tolist(module.network.private_subnet_cidrs)
+    cidr_blocks = tolist(module.network.public_subnet_cidrs)
   }
 
   ingress {
@@ -39,7 +38,7 @@ resource "aws_security_group" "alb" {
     from_port = 443
     to_port = 443
     protocol = "tcp"
-    cidr_blocks = tolist(module.network.private_subnet_cidrs)
+    cidr_blocks = tolist(module.network.public_subnet_cidrs)
   }
 
   egress {
@@ -64,7 +63,7 @@ resource "aws_lb_listener" "http" {
       protocol = "HTTPS"
       status_code = "HTTP_301"
     }
-    target_group_arn = aws_lb_target_group.target_group.arn
+    target_group_arn = aws_lb_target_group.http.arn
   }
 }
 
@@ -73,7 +72,7 @@ resource "aws_lb_listener" "https" {
   port = 443
   protocol = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn = join("", module.acm.acm_arn)
+  certificate_arn = join("", module.acm.this_acm_certificate_arn)
 
   default_action {
     type = "redirect"
@@ -82,14 +81,22 @@ resource "aws_lb_listener" "https" {
       protocol = "HTTPS"
       status_code = "HTTP_301"
     }
-    target_group_arn = aws_lb_target_group.target_group.arn
+    target_group_arn = aws_lb_target_group.https.arn
   }
 }
 
-resource "aws_lb_target_group" "target_group" {
+resource "aws_lb_target_group" "http" {
   name_prefix = substr(local.name, 0, 6)
   port = 80
   protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = module.network.vpc_id
+}
+
+resource "aws_lb_target_group" "https" {
+  name_prefix = substr(local.name, 0, 6)
+  port = 443
+  protocol = "HTTPS"
   target_type = "ip"
   vpc_id = module.network.vpc_id
 }
